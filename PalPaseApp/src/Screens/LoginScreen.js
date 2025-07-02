@@ -14,6 +14,13 @@ export default function LoginScreen({ navigation }) {
         title="Probar Toast"
         onPress={() => showInfo("Hola desde el toast!")}
       />
+
+      {/* Botón solo para pruebas */}
+
+       <Button
+        title="Entrar sin registro"
+        onPress={() => navigation.navigate("Home")}
+      />
     </View>
   );
 }
