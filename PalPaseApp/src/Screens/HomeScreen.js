@@ -1,42 +1,61 @@
-import React from 'react';
-import {View,Text,StyleSheet,TouchableOpacity,Image,ImageBackground,} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, ScrollView, RefreshControl } from 'react-native';
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setLastUpdated(new Date().toLocaleString()); // Establecer la hora de última actualización
+      setRefreshing(false);
+    }, 1000);
+  };
+
   return (
     <ImageBackground
       source={require('../../assets/fondo.png')}
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        {/* Iconos */}
-        <TouchableOpacity style={styles.iconTopLeft}>
-          <Image source={require('../../assets/profile-icon.png')} style={styles.iconImage} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconTopRight}>
-          <Image source={require('../../assets/logout-icon.png')} style={styles.iconImage} />
-        </TouchableOpacity>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.container}>
+          {/* Iconos */}
+          <TouchableOpacity style={styles.iconTopLeft}>
+            <Image source={require('../../assets/profile-icon.png')} style={styles.iconImage} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconTopRight}>
+            <Image source={require('../../assets/logout-icon.png')} style={styles.iconImage} />
+          </TouchableOpacity>
 
-        {/* Logo */}
-        <Image source={require('../../assets/logo-palpase.png')} style={styles.logo} />
+          {/* Logo */}
+          <Image source={require('../../assets/logo-palpase.png')} style={styles.logo} />
 
-        {/* Monto */}
-        <View style={styles.balanceContainer}>
-          <Text style={styles.balanceLabel}>Monto</Text>
-          <Text style={styles.balanceAmount}>₡15.000</Text>
+          {/* Monto */}
+          <View style={styles.balanceContainer}>
+            <Text style={styles.balanceLabel}>Monto</Text>
+            <Text style={styles.balanceAmount}>₡15.000</Text>
+          </View>
+
+          {/* Botones */}
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>MostrarQR</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Recargar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Administrar Tarjetas</Text>
+          </TouchableOpacity>
+
+          {/* Última actualización */}
+          <Text style={styles.lastUpdated}>Última actualización: {lastUpdated}</Text>
         </View>
-
-        {/* Botones */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>MostrarQR</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Recargar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Administrar Tarjetas</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -98,5 +117,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#000',
     fontSize: 16,
+  },
+  lastUpdated: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 20,
+    textAlign: 'center',
   },
 });

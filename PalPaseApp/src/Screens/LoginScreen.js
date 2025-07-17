@@ -7,15 +7,27 @@ import {
   ImageBackground,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 
 export default function LoginScreen({ navigation }) {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const handleLogin = () => {
     // Aquí deberías validar con tu backend o lógica local
     console.log("Iniciar sesión con:", usuario, contrasena);
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setLastUpdated(new Date().toLocaleString()); // Establecer la hora de última actualización
+      setRefreshing(false);
+    }, 1000);
   };
 
   return (
@@ -23,39 +35,47 @@ export default function LoginScreen({ navigation }) {
       source={require("../../assets/fondo.png")}
       style={styles.background}
     >
-      <Image
-        source={require("../../assets/logo-palpase.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-      <View style={styles.container}>
-        <TextInput
-          placeholder="Usuario"
-          value={usuario}
-          onChangeText={setUsuario}
-          style={styles.input}
-          placeholderTextColor="#333"
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <Image
+          source={require("../../assets/logo-palpase.png")}
+          style={styles.logo}
+          resizeMode="contain"
         />
-        <TextInput
-          placeholder="Contraseña"
-          value={contrasena}
-          onChangeText={setContrasena}
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#333"
-        />
+        <View style={styles.container}>
+          <TextInput
+            placeholder="Usuario"
+            value={usuario}
+            onChangeText={setUsuario}
+            style={styles.input}
+            placeholderTextColor="#333"
+          />
+          <TextInput
+            placeholder="Contraseña"
+            value={contrasena}
+            onChangeText={setContrasena}
+            secureTextEntry
+            style={styles.input}
+            placeholderTextColor="#333"
+          />
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Inicio Sesión</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginText}>Inicio Sesión</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={() => navigation.navigate("Register")}
-        >
-          <Text style={styles.registerText}>Registrarse</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.registerText}>Registrarse</Text>
+          </TouchableOpacity>
+
+          {/* Última actualización */}
+          <Text style={styles.lastUpdated}>Última actualización: {lastUpdated}</Text>
+        </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -105,5 +125,11 @@ const styles = StyleSheet.create({
   registerText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  lastUpdated: {
+    fontSize: 14,
+    color: "#888",
+    marginTop: 20,
+    textAlign: "center",
   },
 });
