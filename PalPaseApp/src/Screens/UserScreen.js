@@ -7,14 +7,21 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 
 export default function UserProfileScreen({ navigation }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
-    // Datos simulados
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = () => {
+    // Simula una carga de datos
     setTimeout(() => {
       const mockUser = {
         id: 12345,
@@ -28,8 +35,15 @@ export default function UserProfileScreen({ navigation }) {
       };
       setUser(mockUser);
       setLoading(false);
+      setLastUpdated(new Date().toLocaleString());  // Fecha y hora de la última actualización
     }, 1000);
-  }, []);
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUserData();
+    setRefreshing(false);
+  };
 
   if (loading) {
     return (
@@ -44,7 +58,12 @@ export default function UserProfileScreen({ navigation }) {
       source={require('../../assets/fondo.png')}
       style={styles.background}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.contentBox}>
           <Text style={styles.title}>Perfil de Usuario</Text>
 
@@ -72,6 +91,9 @@ export default function UserProfileScreen({ navigation }) {
               </View>
             ))
           )}
+
+          {/* Mostrar última actualización */}
+          <Text style={styles.lastUpdated}>Última actualización: {lastUpdated}</Text>
 
           <TouchableOpacity
             style={styles.homeButton}
@@ -124,6 +146,12 @@ const styles = StyleSheet.create({
   },
   paymentMethod: {
     marginLeft: 10,
+  },
+  lastUpdated: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 20,
+    textAlign: 'center',
   },
   homeButton: {
     marginTop: 30,

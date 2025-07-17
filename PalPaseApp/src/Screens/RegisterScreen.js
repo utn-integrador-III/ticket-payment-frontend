@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 
 export default function RegisterScreen({ navigation }) {
@@ -20,20 +21,20 @@ export default function RegisterScreen({ navigation }) {
   const [correo, setCorreo] = useState("");
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const handleRegister = () => {
-    // Aquí deberías enviar los datos al backend o validarlos localmente
-    console.log("Registrando:", {
-      nombreCompleto,
-      titularTarjeta,
-      numeroTarjeta,
-      fechaExpiracion,
-      cvv,
-      telefono,
-      correo,
-      usuario,
-      contrasena,
-    });
+    // Aquí debes realizar la lógica de registro
+    console.log("Registrado con éxito", { nombreCompleto, telefono, correo });
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setLastUpdated(new Date().toLocaleString());
+      setRefreshing(false);
+    }, 1000);
   };
 
   return (
@@ -41,73 +42,38 @@ export default function RegisterScreen({ navigation }) {
       source={require("../../assets/fondo.png")}
       style={styles.background}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <Image
           source={require("../../assets/logo-palpase.png")}
           style={styles.logo}
-          resizeMode="contain"
         />
         <View style={styles.container}>
           <TextInput
-            placeholder="Nombre completo"
+            placeholder="Nombre Completo"
             value={nombreCompleto}
             onChangeText={setNombreCompleto}
             style={styles.input}
-            placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Titular de la tarjeta"
-            value={titularTarjeta}
-            onChangeText={setTitularTarjeta}
-            style={styles.input}
-            placeholderTextColor="#333"
-          />
-          <TextInput
-            placeholder="Número de tarjeta"
-            value={numeroTarjeta}
-            onChangeText={setNumeroTarjeta}
-            keyboardType="numeric"
-            style={styles.input}
-            placeholderTextColor="#333"
-          />
-          <TextInput
-            placeholder="Fecha de expiración (MM/AA)"
-            value={fechaExpiracion}
-            onChangeText={setFechaExpiracion}
-            style={styles.input}
-            placeholderTextColor="#333"
-          />
-          <TextInput
-            placeholder="CVV"
-            value={cvv}
-            onChangeText={setCvv}
-            keyboardType="numeric"
-            secureTextEntry
-            style={styles.input}
-            placeholderTextColor="#333"
-          />
-          <TextInput
-            placeholder="Número de teléfono"
+            placeholder="Número de Teléfono"
             value={telefono}
             onChangeText={setTelefono}
-            keyboardType="phone-pad"
             style={styles.input}
-            placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Correo electrónico"
+            placeholder="Correo Electrónico"
             value={correo}
             onChangeText={setCorreo}
-            keyboardType="email-address"
             style={styles.input}
-            placeholderTextColor="#333"
           />
           <TextInput
             placeholder="Usuario"
             value={usuario}
             onChangeText={setUsuario}
             style={styles.input}
-            placeholderTextColor="#333"
           />
           <TextInput
             placeholder="Contraseña"
@@ -115,19 +81,47 @@ export default function RegisterScreen({ navigation }) {
             onChangeText={setContrasena}
             secureTextEntry
             style={styles.input}
-            placeholderTextColor="#333"
+          />
+          
+          {/* Métodos de pago */}
+          <TextInput
+            placeholder="Nombre del Titular"
+            value={titularTarjeta}
+            onChangeText={setTitularTarjeta}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Número de Tarjeta"
+            value={numeroTarjeta}
+            onChangeText={setNumeroTarjeta}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Fecha de Expiración"
+            value={fechaExpiracion}
+            onChangeText={setFechaExpiracion}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="CVV"
+            value={cvv}
+            onChangeText={setCvv}
+            style={styles.input}
           />
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleRegister}>
-            <Text style={styles.loginText}>Registrarse</Text>
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+            <Text style={styles.registerText}>Registrar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.registerButton}
-            onPress={() => navigation.goBack()}
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("Login")}
           >
-            <Text style={styles.registerText}>Volver al inicio</Text>
+            <Text style={styles.loginText}>Ya tienes cuenta? Iniciar sesión</Text>
           </TouchableOpacity>
+
+          {/* Última actualización */}
+          <Text style={styles.lastUpdated}>Última actualización: {lastUpdated}</Text>
         </View>
       </ScrollView>
     </ImageBackground>
@@ -139,15 +133,10 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 40,
-    paddingBottom: 40,
-  },
   container: {
     flex: 1,
     justifyContent: "center",
+    paddingHorizontal: 40,
   },
   logo: {
     width: 180,
@@ -164,25 +153,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#888",
   },
-  loginButton: {
+  registerButton: {
     backgroundColor: "#91cfd0",
     borderRadius: 10,
     padding: 12,
     alignItems: "center",
     marginBottom: 10,
   },
-  loginText: {
+  registerText: {
     color: "#fff",
     fontWeight: "bold",
   },
-  registerButton: {
+  loginButton: {
     backgroundColor: "#f5a6a6",
     borderRadius: 10,
     padding: 12,
     alignItems: "center",
   },
-  registerText: {
+  loginText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  lastUpdated: {
+    fontSize: 14,
+    color: "#888",
+    marginTop: 20,
+    textAlign: "center",
   },
 });
