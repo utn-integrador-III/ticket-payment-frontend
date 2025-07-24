@@ -10,16 +10,32 @@ import {
   ScrollView,
   RefreshControl,
 } from "react-native";
+import apiClient from "../Api/apiClient";
 
 export default function LoginScreen({ navigation }) {
-  const [usuario, setUsuario] = useState("");
+  const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const handleLogin = () => {
-    // Aquí deberías validar con tu backend o lógica local
-    console.log("Iniciar sesión con:", usuario, contrasena);
+  const handleLogin = async () => {
+    try {
+      const response = await apiClient.post("/login", {
+        email: email.trim().toLowerCase(),
+        password: contrasena,
+      });
+
+      const data = response.data;
+
+      navigation.replace("Home", { userId: data.user_id, token: data.access_token });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.detail) {
+        alert(error.response.data.detail);
+      } else {
+        alert("Error de conexión con el servidor");
+      }
+      console.error(error);
+    }
   };
 
   const onRefresh = () => {
@@ -46,11 +62,13 @@ export default function LoginScreen({ navigation }) {
         />
         <View style={styles.container}>
           <TextInput
-            placeholder="Usuario"
-            value={usuario}
-            onChangeText={setUsuario}
+            placeholder="Correo electrónico"
+            value={email}
+            onChangeText={setEmail}
             style={styles.input}
             placeholderTextColor="#333"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
           <TextInput
             placeholder="Contraseña"
