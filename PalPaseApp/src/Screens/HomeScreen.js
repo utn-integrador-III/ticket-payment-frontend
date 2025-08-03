@@ -87,7 +87,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Administrar")}
+          onPress={() => navigation.navigate("ManageCards")}
         >
           <Text style={styles.buttonText}>Administrar Tarjetas</Text>
         </TouchableOpacity>
