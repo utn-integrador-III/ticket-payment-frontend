@@ -74,11 +74,11 @@ export default function HomeScreen() {
           <Text style={styles.buttonText}>Ver mi código QR</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Recargar")}
-        >
-          <Text style={styles.buttonText}>Recargar tarjeta</Text>
-        </TouchableOpacity>
+  style={styles.button}
+  onPress={() => navigation.navigate("RechargeCard")}
+>
+  <Text style={styles.buttonText}>Recargar tarjeta</Text>
+</TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Historial")}

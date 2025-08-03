@@ -7,6 +7,7 @@ import UserScreen from "../Screens/UserScreen";
 import QRCodeScreen from "../Screens/QRCodeScreen";
 import ManageCardsScreen from "../Screens/ManageCardsScreen";
 import RegisterCardScreen from "../Screens/RegisterCardScreen"; 
+import RecargaTarjeta from "../Screens/RechargeCard";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export default function AppNavigator() {
       <Stack.Screen name="QRCode" component={QRCodeScreen} />
       <Stack.Screen name="ManageCards" component={ManageCardsScreen} />
       <Stack.Screen name="RegisterCard" component={RegisterCardScreen} />
+      <Stack.Screen name="RechargeCard" component={RecargaTarjeta} />
     </Stack.Navigator>
   );
 }
