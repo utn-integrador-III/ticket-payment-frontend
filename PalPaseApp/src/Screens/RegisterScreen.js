@@ -10,6 +10,8 @@ import {
   ScrollView,
 } from "react-native";
 import apiClient from "../Api/apiClient";
+import { useSimpleLanguage } from "../hooks/useSimpleLanguage";
+import SimpleLanguageSelector from "../components/SimpleLanguageSelector";
 
 
 export default function RegisterScreen({ navigation }) {
@@ -17,6 +19,8 @@ export default function RegisterScreen({ navigation }) {
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [showCard, setShowCard] = useState(false);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+  const { t } = useSimpleLanguage();
 
   // Campos de tarjeta
   const [cardHolder, setCardHolder] = useState("");
@@ -46,16 +50,17 @@ export default function RegisterScreen({ navigation }) {
       const response = await apiClient.post("/register", payload);
 
       if (response.data && response.data.error) {
-        alert(response.data.error || "Error al registrar usuario");
+        alert(response.data.error || t('registerError'));
         return;
       }
 
+      alert(t('registerSuccess'));
       navigation.goBack();
     } catch (error) {
       if (error.response && error.response.data && error.response.data.detail) {
         alert(error.response.data.detail);
       } else {
-        alert("Error de conexión con el servidor");
+        alert(t('registerError'));
       }
       console.error(error);
     }
@@ -73,15 +78,23 @@ export default function RegisterScreen({ navigation }) {
           resizeMode="contain"
         />
         <View style={styles.container}>
+          {/* Language selector button */}
+          <TouchableOpacity 
+            style={styles.languageButton}
+            onPress={() => setShowLanguageSelector(true)}
+          >
+            <Text style={styles.languageButtonText}>🌐</Text>
+          </TouchableOpacity>
+
           <TextInput
-            placeholder="Nombre completo"
+            placeholder={t('fullName')}
             value={nombreCompleto}
             onChangeText={setNombreCompleto}
             style={styles.input}
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Correo electrónico"
+            placeholder={t('email')}
             value={correo}
             onChangeText={setCorreo}
             keyboardType="email-address"
@@ -89,7 +102,7 @@ export default function RegisterScreen({ navigation }) {
             placeholderTextColor="#333"
           />
           <TextInput
-            placeholder="Contraseña"
+            placeholder={t('password')}
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
@@ -102,21 +115,21 @@ export default function RegisterScreen({ navigation }) {
             onPress={() => setShowCard(!showCard)}
           >
             <Text style={styles.loginText}>
-              {showCard ? "Ocultar tarjeta" : "Agregar tarjeta (opcional)"}
+              {showCard ? t('removeCard') : t('addCard')}
             </Text>
           </TouchableOpacity>
 
           {showCard && (
             <View style={{ marginTop: 10, marginBottom: 10 }}>
               <TextInput
-                placeholder="Titular de la tarjeta"
+                placeholder={t('cardHolder')}
                 value={cardHolder}
                 onChangeText={setCardHolder}
                 style={styles.input}
                 placeholderTextColor="#333"
               />
               <TextInput
-                placeholder="Número de tarjeta"
+                placeholder={t('cardNumber')}
                 value={cardNumber}
                 onChangeText={setCardNumber}
                 keyboardType="numeric"
@@ -125,7 +138,7 @@ export default function RegisterScreen({ navigation }) {
                 maxLength={16}
               />
               <TextInput
-                placeholder="Vencimiento (MM/AA)"
+                placeholder={t('expiryDate')}
                 value={expiry}
                 onChangeText={setExpiry}
                 style={styles.input}
@@ -133,7 +146,7 @@ export default function RegisterScreen({ navigation }) {
                 maxLength={5}
               />
               <TextInput
-                placeholder="CVV"
+                placeholder={t('cvv')}
                 value={cvv}
                 onChangeText={setCvv}
                 keyboardType="numeric"
@@ -146,16 +159,21 @@ export default function RegisterScreen({ navigation }) {
           )}
 
           <TouchableOpacity style={styles.loginButton} onPress={handleRegister}>
-            <Text style={styles.loginText}>Registrarse</Text>
+            <Text style={styles.loginText}>{t('register')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.registerButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.registerText}>Volver al inicio</Text>
+            <Text style={styles.registerText}>{t('back')}</Text>
           </TouchableOpacity>
         </View>
+
+        <SimpleLanguageSelector
+          visible={showLanguageSelector}
+          onClose={() => setShowLanguageSelector(false)}
+        />
       </ScrollView>
     </ImageBackground>
   );
@@ -211,5 +229,19 @@ const styles = StyleSheet.create({
   registerText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  languageButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  languageButtonText: {
+    fontSize: 20,
   },
 });

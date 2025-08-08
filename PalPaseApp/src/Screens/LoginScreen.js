@@ -11,12 +11,16 @@ import {
   RefreshControl,
 } from "react-native";
 import apiClient from "../Api/apiClient";
+import { useSimpleLanguage } from "../hooks/useSimpleLanguage";
+import SimpleLanguageSelector from "../components/SimpleLanguageSelector";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+  const { t } = useSimpleLanguage();
 
   const handleLogin = async () => {
     try {
@@ -32,7 +36,7 @@ export default function LoginScreen({ navigation }) {
       if (error.response && error.response.data && error.response.data.detail) {
         alert(error.response.data.detail);
       } else {
-        alert("Error de conexión con el servidor");
+        alert(t('loginError'));
       }
       console.error(error);
     }
@@ -61,8 +65,16 @@ export default function LoginScreen({ navigation }) {
           resizeMode="contain"
         />
         <View style={styles.container}>
+          {/* Language selector button */}
+          <TouchableOpacity 
+            style={styles.languageButton}
+            onPress={() => setShowLanguageSelector(true)}
+          >
+            <Text style={styles.languageButtonText}>🌐</Text>
+          </TouchableOpacity>
+
           <TextInput
-            placeholder="Correo electrónico"
+            placeholder={t('email')}
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -71,7 +83,7 @@ export default function LoginScreen({ navigation }) {
             keyboardType="email-address"
           />
           <TextInput
-            placeholder="Contraseña"
+            placeholder={t('password')}
             value={contrasena}
             onChangeText={setContrasena}
             secureTextEntry
@@ -80,19 +92,28 @@ export default function LoginScreen({ navigation }) {
           />
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginText}>Inicio Sesión</Text>
+            <Text style={styles.loginText}>{t('login')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.registerButton}
             onPress={() => navigation.navigate("Register")}
           >
-            <Text style={styles.registerText}>Registrarse</Text>
+            <Text style={styles.registerText}>{t('register')}</Text>
           </TouchableOpacity>
 
           {/* Última actualización */}
-          <Text style={styles.lastUpdated}>Última actualización: {lastUpdated}</Text>
+          {lastUpdated && (
+            <Text style={styles.lastUpdated}>
+              {t('loading')}: {lastUpdated}
+            </Text>
+          )}
         </View>
+
+        <SimpleLanguageSelector
+          visible={showLanguageSelector}
+          onClose={() => setShowLanguageSelector(false)}
+        />
       </ScrollView>
     </ImageBackground>
   );
@@ -149,5 +170,19 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 20,
     textAlign: "center",
+  },
+  languageButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  languageButtonText: {
+    fontSize: 20,
   },
 });

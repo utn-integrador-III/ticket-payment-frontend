@@ -12,11 +12,13 @@ import {
   TouchableOpacity,
   ImageBackground
 } from 'react-native';
+import { useSimpleLanguage } from '../hooks/useSimpleLanguage';
 
 export default function RecargaTarjeta({ navigation }) {
   const [monto, setMonto] = useState('');
   const [tarjeta, setTarjeta] = useState('');
   const [mensaje, setMensaje] = useState('');
+  const { t } = useSimpleLanguage();
 
   // Tarjetas simuladas
   const tarjetas = [
@@ -26,24 +28,24 @@ export default function RecargaTarjeta({ navigation }) {
 
   const realizarRecarga = async () => {
     if (!monto || parseFloat(monto) <= 0) {
-      Alert.alert('Error', 'Debe ingresar un monto válido.');
+      Alert.alert(t('error'), 'Debe ingresar un monto válido.');
       return;
     }
 
     if (!tarjeta) {
-      Alert.alert('Error', 'Debe seleccionar una tarjeta.');
+      Alert.alert(t('error'), 'Debe seleccionar una tarjeta.');
       return;
     }
 
     try {
       // Aquí deberías hacer el fetch real al backend
       // Simulación de éxito:
-      setMensaje('La recarga se ha realizado exitosamente.');
-      Alert.alert('Se realizo la recarga.', mensaje);
+      setMensaje(t('rechargeSuccess'));
+      Alert.alert(t('rechargeSuccess'), mensaje);
       setMonto('');
       setTarjeta('');
     } catch (error) {
-      Alert.alert('Error', 'No se pudo realizar la recarga.');
+      Alert.alert(t('error'), t('rechargeError'));
     }
   };
 
@@ -59,7 +61,7 @@ export default function RecargaTarjeta({ navigation }) {
         style={styles.logo}
       />
 
-      <Text style={styles.title}>Digite monto</Text>
+      <Text style={styles.title}>{t('amount')}</Text>
       <TextInput
         style={styles.input}
         keyboardType="numeric"
@@ -68,13 +70,13 @@ export default function RecargaTarjeta({ navigation }) {
         onChangeText={setMonto}
       />
 
-      <Text style={styles.title}>Seleccionar Tarjeta</Text>
+      <Text style={styles.title}>{t('selectCard')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={tarjeta}
           onValueChange={(itemValue) => setTarjeta(itemValue)}
         >
-          <Picker.Item label="Elegir tarjeta" value="" />
+          <Picker.Item label={t('selectCard')} value="" />
           {tarjetas.map((t) => (
             <Picker.Item label={t.alias} value={t.id} key={t.id} />
           ))}
@@ -82,14 +84,14 @@ export default function RecargaTarjeta({ navigation }) {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={realizarRecarga}>
-        <Text style={styles.buttonText}>Realizar Recarga</Text>
+        <Text style={styles.buttonText}>{t('rechargeCard')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.button, styles.backButton]}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.buttonText}>Regresar</Text>
+        <Text style={styles.buttonText}>{t('back')}</Text>
       </TouchableOpacity>
     </ScrollView>
   </ImageBackground>

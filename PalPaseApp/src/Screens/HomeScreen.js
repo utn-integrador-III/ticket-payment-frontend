@@ -10,11 +10,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useSimpleLanguage } from "../hooks/useSimpleLanguage";
+import SimpleLanguageSelector from "../components/SimpleLanguageSelector";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+  const { t } = useSimpleLanguage();
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -47,55 +51,60 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconTopRight}>
-          <Image
-            source={require("../../assets/logout-icon.png")}
-            style={styles.iconImage}
-          />
+        <TouchableOpacity 
+          style={styles.iconTopRight}
+          onPress={() => setShowLanguageSelector(true)}
+        >
+          <Text style={styles.languageIcon}>🌐</Text>
         </TouchableOpacity>
         <Image
           source={require("../../assets/logo-palpase.png")}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>¡Bienvenido a PalPase!</Text>
+        <Text style={styles.title}>{t('welcome')} PalPase!</Text>
         <Text style={styles.subtitle}>
-          Tu aplicación para el pago de pasajes de bus
+          {t('balance')}
         </Text>
         {/* Monto */}
         <View style={styles.balanceContainer}>
-          <Text style={styles.balanceLabel}>Monto</Text>
+          <Text style={styles.balanceLabel}>{t('balance')}</Text>
           <Text style={styles.balanceAmount}>₡15.000</Text>
         </View>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("QRCode")}
         >
-          <Text style={styles.buttonText}>Ver mi código QR</Text>
+          <Text style={styles.buttonText}>{t('qrCode')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-  style={styles.button}
-  onPress={() => navigation.navigate("RechargeCard")}
->
-  <Text style={styles.buttonText}>Recargar tarjeta</Text>
-</TouchableOpacity>
+          style={styles.button}
+          onPress={() => navigation.navigate("RechargeCard")}
+        >
+          <Text style={styles.buttonText}>{t('rechargeCard')}</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Historial")}
         >
-          <Text style={styles.buttonText}>Ver historial de pagos</Text>
+          <Text style={styles.buttonText}>{t('recentTransactions')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("ManageCards")}
         >
-          <Text style={styles.buttonText}>Administrar Tarjetas</Text>
+          <Text style={styles.buttonText}>{t('myCards')}</Text>
         </TouchableOpacity>
         {lastUpdated && (
           <Text style={styles.lastUpdated}>
-            Última actualización: {lastUpdated}
+            {t('loading')}: {lastUpdated}
           </Text>
         )}
+
+        <SimpleLanguageSelector
+          visible={showLanguageSelector}
+          onClose={() => setShowLanguageSelector(false)}
+        />
       </ScrollView>
     </ImageBackground>
   );
@@ -164,5 +173,9 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 20,
     textAlign: "center",
+  },
+  languageIcon: {
+    fontSize: 24,
+    color: "#333",
   },
 });

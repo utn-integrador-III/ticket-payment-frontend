@@ -1,0 +1,109 @@
+{
+  "common": {
+    "accept": "Accept",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fullName": "Full Name",
+    "forgotPassword": "Forgot your password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginSuccess": "Login successful",
+    "loginError": "Login error",
+    "registerSuccess": "Registration successful",
+    "registerError": "Registration error",
+    "invalidEmail": "Invalid email",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordsDontMatch": "Passwords don't match"
+  },
+  "home": {
+    "welcome": "Welcome",
+    "balance": "Balance",
+    "recentTransactions": "Recent Transactions",
+    "quickActions": "Quick Actions",
+    "recharge": "Recharge",
+    "transfer": "Transfer",
+    "pay": "Pay",
+    "qrCode": "QR Code"
+  },
+  "cards": {
+    "myCards": "My Cards",
+    "addCard": "Add Card",
+    "cardNumber": "Card Number",
+    "cardHolder": "Card Holder",
+    "expiryDate": "Expiry Date",
+    "cvv": "CVV",
+    "defaultCard": "Default Card",
+    "setAsDefault": "Set as Default",
+    "removeCard": "Remove Card",
+    "cardAdded": "Card added successfully",
+    "cardRemoved": "Card removed successfully",
+    "invalidCardNumber": "Invalid card number",
+    "invalidExpiryDate": "Invalid expiry date",
+    "invalidCVV": "Invalid CVV"
+  },
+  "recharge": {
+    "rechargeCard": "Recharge Card",
+    "amount": "Amount",
+    "selectCard": "Select Card",
+    "rechargeSuccess": "Recharge successful",
+    "rechargeError": "Recharge error",
+    "insufficientFunds": "Insufficient funds",
+    "minimumAmount": "Minimum amount: ₡1000",
+    "maximumAmount": "Maximum amount: ₡500000"
+  },
+  "qr": {
+    "qrCode": "QR Code",
+    "scanQR": "Scan QR",
+    "generateQR": "Generate QR",
+    "qrGenerated": "QR Code generated",
+    "qrScanned": "QR Code scanned",
+    "invalidQR": "Invalid QR Code"
+  },
+  "profile": {
+    "profile": "Profile",
+    "personalInfo": "Personal Information",
+    "settings": "Settings",
+    "language": "Language",
+    "notifications": "Notifications",
+    "security": "Security",
+    "changePassword": "Change Password",
+    "logout": "Logout",
+    "logoutConfirm": "Are you sure you want to logout?",
+    "profileUpdated": "Profile updated successfully"
+  },
+  "drive": {
+    "driver": "Driver",
+    "passenger": "Passenger",
+    "selectRole": "Select Role",
+    "startTrip": "Start Trip",
+    "endTrip": "End Trip",
+    "tripStarted": "Trip started",
+    "tripEnded": "Trip ended",
+    "fare": "Fare",
+    "distance": "Distance",
+    "duration": "Duration"
+  },
+  "settings": {
+    "language": "Language",
+    "spanish": "Spanish",
+    "english": "English",
+    "languageChanged": "Language changed successfully"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "common": {
+    "accept": "Aceptar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "fullName": "Nombre Completo",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "dontHaveAccount": "¿No tienes cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "loginSuccess": "Inicio de sesión exitoso",
+    "loginError": "Error al iniciar sesión",
+    "registerSuccess": "Registro exitoso",
+    "registerError": "Error al registrarse",
+    "invalidEmail": "Correo electrónico inválido",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "passwordsDontMatch": "Las contraseñas no coinciden"
+  },
+  "home": {
+    "welcome": "Bienvenido",
+    "balance": "Saldo",
+    "recentTransactions": "Transacciones Recientes",
+    "quickActions": "Acciones Rápidas",
+    "recharge": "Recargar",
+    "transfer": "Transferir",
+    "pay": "Pagar",
+    "qrCode": "Código QR"
+  },
+  "cards": {
+    "myCards": "Mis Tarjetas",
+    "addCard": "Agregar Tarjeta",
+    "cardNumber": "Número de Tarjeta",
+    "cardHolder": "Titular de la Tarjeta",
+    "expiryDate": "Fecha de Vencimiento",
+    "cvv": "CVV",
+    "defaultCard": "Tarjeta Predeterminada",
+    "setAsDefault": "Establecer como Predeterminada",
+    "removeCard": "Eliminar Tarjeta",
+    "cardAdded": "Tarjeta agregada exitosamente",
+    "cardRemoved": "Tarjeta eliminada exitosamente",
+    "invalidCardNumber": "Número de tarjeta inválido",
+    "invalidExpiryDate": "Fecha de vencimiento inválida",
+    "invalidCVV": "CVV inválido"
+  },
+  "recharge": {
+    "rechargeCard": "Recargar Tarjeta",
+    "amount": "Monto",
+    "selectCard": "Seleccionar Tarjeta",
+    "rechargeSuccess": "Recarga exitosa",
+    "rechargeError": "Error en la recarga",
+    "insufficientFunds": "Fondos insuficientes",
+    "minimumAmount": "Monto mínimo: ₡1000",
+    "maximumAmount": "Monto máximo: ₡500000"
+  },
+  "qr": {
+    "qrCode": "Código QR",
+    "scanQR": "Escanear QR",
+    "generateQR": "Generar QR",
+    "qrGenerated": "Código QR generado",
+    "qrScanned": "Código QR escaneado",
+    "invalidQR": "Código QR inválido"
+  },
+  "profile": {
+    "profile": "Perfil",
+    "personalInfo": "Información Personal",
+    "settings": "Configuraciones",
+    "language": "Idioma",
+    "notifications": "Notificaciones",
+    "security": "Seguridad",
+    "changePassword": "Cambiar Contraseña",
+    "logout": "Cerrar Sesión",
+    "logoutConfirm": "¿Estás seguro que deseas cerrar sesión?",
+    "profileUpdated": "Perfil actualizado exitosamente"
+  },
+  "drive": {
+    "driver": "Conductor",
+    "passenger": "Pasajero",
+    "selectRole": "Seleccionar Rol",
+    "startTrip": "Iniciar Viaje",
+    "endTrip": "Finalizar Viaje",
+    "tripStarted": "Viaje iniciado",
+    "tripEnded": "Viaje finalizado",
+    "fare": "Tarifa",
+    "distance": "Distancia",
+    "duration": "Duración"
+  },
+  "settings": {
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés",
+    "languageChanged": "Idioma cambiado exitosamente"
+  }
+}

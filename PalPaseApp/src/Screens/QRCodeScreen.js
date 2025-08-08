@@ -9,9 +9,11 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import QRCode from "react-native-qrcode-svg";
+import { useSimpleLanguage } from "../hooks/useSimpleLanguage";
 
 export default function QRCodeScreen() {
   const navigation = useNavigation();
+  const { t } = useSimpleLanguage();
 
   return (
     <ImageBackground
@@ -34,7 +36,7 @@ export default function QRCodeScreen() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>Regresar</Text>
+          <Text style={styles.backButtonText}>{t('back')}</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

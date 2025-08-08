@@ -22,54 +22,11 @@ import {
   Poppins_400Regular,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { useSimpleLanguage } from "../hooks/useSimpleLanguage";
+import SimpleLanguageSelector from "../components/SimpleLanguageSelector";
 
 const fondoImage = require("../../assets/fondo.png");
 const defaultAvatar = require("../../assets/profile-icon.png");
-
-const translations = {
-  es: {
-    welcome: "Bienvenido de nuevo",
-    profile: "Perfil de Usuario",
-    id: "ID",
-    name: "Nombre",
-    email: "Correo",
-    balance: "Saldo",
-    history: "Historial de pagos",
-    theme: "Tema",
-    editProfile: "Editar perfil",
-    changePassword: "Cambiar contraseña",
-    logout: "Cerrar sesión",
-    confirmLogout: "¿Estás seguro de que deseas salir?",
-    cancel: "Cancelar",
-    exit: "Salir",
-    editPhoto: "Editar foto",
-    language: "Idioma",
-    reloadBalance: "Recargar saldo",
-    fromGallery: "Desde galería",
-    fromCamera: "Desde cámara",
-  },
-  en: {
-    welcome: "Welcome back",
-    profile: "User Profile",
-    id: "ID",
-    name: "Name",
-    email: "Email",
-    balance: "Balance",
-    history: "Payment History",
-    theme: "Theme",
-    editProfile: "Edit Profile",
-    changePassword: "Change Password",
-    logout: "Log Out",
-    confirmLogout: "Are you sure you want to log out?",
-    cancel: "Cancel",
-    exit: "Exit",
-    editPhoto: "Edit photo",
-    language: "Language",
-    reloadBalance: "Reload Balance",
-    fromGallery: "From gallery",
-    fromCamera: "From camera",
-  },
-};
 
 const themes = {
   light: { bg: "#ffffffcc", title: "#184e77" },
@@ -81,11 +38,11 @@ export default function UserScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
-  const [language, setLanguage] = useState("es");
   const [isDark, setIsDark] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const t = translations[language];
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+  const { t, currentLanguage } = useSimpleLanguage();
   const theme = isDark ? themes.dark : themes.light;
 
   const [fontsLoaded] = useFonts({
@@ -167,21 +124,21 @@ export default function UserScreen({ navigation }) {
   };
 
   const confirmLogout = () => {
-    Alert.alert(t.logout, t.confirmLogout, [
-      { text: t.cancel, style: "cancel" },
-      { text: t.exit, onPress: () => navigation.replace("Login") },
+    Alert.alert(t('profile.logout'), t('profile.logoutConfirm'), [
+      { text: t('common.cancel'), style: "cancel" },
+      { text: t('common.confirm'), onPress: () => navigation.replace("Login") },
     ]);
   };
 
   const showInDevelopment = () => {
-    Alert.alert("Info", "Funcionalidad en desarrollo.");
+    Alert.alert(t('common.info'), "Funcionalidad en desarrollo.");
   };
 
   const handleReloadBalance = () => {
     setIsReloading(true);
     setTimeout(() => {
       setIsReloading(false);
-      Alert.alert("Información", "Funcionalidad en desarrollo.");
+      Alert.alert(t('common.info'), "Funcionalidad en desarrollo.");
     }, 2000);
   };
 
@@ -243,38 +200,31 @@ export default function UserScreen({ navigation }) {
 
           <View style={[styles.card, { backgroundColor: theme.bg }]}>
             <Text style={[styles.title, { color: theme.title }]}>
-              {t.profile}
+              {t('profile.profile')}
             </Text>
 
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.id}: {user.id}
+              ID: {user.id}
             </Text>
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.email}: {user.email}
+              {t('auth.email')}: {user.email}
             </Text>
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.balance}: ₡{user.balance.toFixed(2)}
+              {t('home.balance')}: ₡{user.balance.toFixed(2)}
             </Text>
 
             <View style={styles.section}>
               <Text style={[styles.label, { color: theme.title }]}>
-                {t.language}:
+                {t('settings.language')}:
               </Text>
-              <Picker
-                selectedValue={language}
-                onValueChange={(v) => {
-                  setLanguage(v);
-                  Alert.alert(
-                    "Info",
-                    `Idioma cambiado a ${v === "es" ? "Español" : "English"}`
-                  );
-                }}
-                style={{ color: theme.title }}
-                dropdownIconColor={theme.title}
+              <TouchableOpacity
+                style={styles.languageSelector}
+                onPress={() => setShowLanguageSelector(true)}
               >
-                <Picker.Item label="Español" value="es" />
-                <Picker.Item label="English" value="en" />
-              </Picker>
+                <Text style={[styles.languageSelectorText, { color: theme.title }]}>
+                  {currentLanguage === 'es' ? t('settings.spanish') : t('settings.english')} 🌐
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.section}>
@@ -303,23 +253,23 @@ export default function UserScreen({ navigation }) {
               {isReloading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>{t.reloadBalance}</Text>
+                <Text style={styles.buttonText}>{t('home.recharge')}</Text>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={showInDevelopment}>
-              <Text style={styles.buttonText}>{t.editProfile}</Text>
+              <Text style={styles.buttonText}>{t('profile.personalInfo')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={showInDevelopment}>
-              <Text style={styles.buttonText}>{t.changePassword}</Text>
+              <Text style={styles.buttonText}>{t('profile.changePassword')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={confirmLogout}
             >
-              <Text style={styles.logoutText}>{t.logout}</Text>
+              <Text style={styles.logoutText}>{t('profile.logout')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -331,27 +281,32 @@ export default function UserScreen({ navigation }) {
         <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{t.editPhoto}</Text>
+              <Text style={styles.modalTitle}>{t('common.edit')}</Text>
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={pickImageFromGallery}
               >
-                <Text style={styles.modalButtonText}>{t.fromGallery}</Text>
+                <Text style={styles.modalButtonText}>Galería</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalButton} onPress={takePhoto}>
-                <Text style={styles.modalButtonText}>{t.fromCamera}</Text>
+                <Text style={styles.modalButtonText}>Cámara</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: "#ccc" }]}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={[styles.modalButtonText, { color: "#333" }]}>
-                  {t.cancel}
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
+
+        <SimpleLanguageSelector
+          visible={showLanguageSelector}
+          onClose={() => setShowLanguageSelector(false)}
+        />
       </ImageBackground>
     </View>
   );
@@ -483,5 +438,15 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  languageSelector: {
+    backgroundColor: 'rgba(145, 207, 208, 0.2)',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 5,
+  },
+  languageSelectorText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
