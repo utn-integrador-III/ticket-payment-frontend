@@ -43,7 +43,7 @@ export default function RegisterScreen({ navigation }) {
         };
       }
 
-      const response = await apiClient.post("/register", payload);
+      const response = await apiClient.post("/api/register", payload);
 
       if (response.data && response.data.error) {
         alert(response.data.error || "Error al registrar usuario");

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,52 @@ import {
   Image,
   ImageBackground,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import QRCode from "react-native-qrcode-svg";
+import apiClient from "../Api/apiClient";
+import AuthService from "../Services/AuthService";
 
 export default function QRCodeScreen() {
   const navigation = useNavigation();
+  const [qrData, setQrData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    fetchUserQR();
+  }, []);
+
+  const fetchUserQR = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('QRCodeScreen - Obteniendo código QR del usuario...');
+      
+      const response = await apiClient.get('/api/user/qr');
+      console.log('QRCodeScreen - Respuesta del QR:', response.data);
+      
+      if (response.data) {
+        // La respuesta tiene: { qr_code, qr_data, user_id, user_name }
+        setQrData(response.data.qr_data); // ID del usuario para el QR
+        setUserInfo({
+          id: response.data.user_id,
+          name: response.data.user_name,
+          qr_code: response.data.qr_code // Base64 image si quieres usarla
+        });
+        console.log('QRCodeScreen - QR cargado para usuario:', response.data.user_name);
+      } else {
+        setError('No se pudo obtener el código QR');
+      }
+    } catch (error) {
+      console.error('QRCodeScreen - Error obteniendo QR:', error);
+      setError('Error al cargar el código QR');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ImageBackground
@@ -26,8 +66,31 @@ export default function QRCodeScreen() {
           style={styles.logo}
         />
 
-        {/* Código QR */}
-        <QRCode value="https://palpase.com/usuario123" size={200} />
+        {/* Información del usuario */}
+        {userInfo && (
+          <Text style={styles.userInfo}>
+            {userInfo.name}
+          </Text>
+        )}
+
+        {/* Código QR o Loading */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007BFF" />
+            <Text style={styles.loadingText}>Generando código QR...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={fetchUserQR}>
+              <Text style={styles.retryButtonText}>Reintentar</Text>
+            </TouchableOpacity>
+          </View>
+        ) : qrData ? (
+          <QRCode value={qrData} size={200} />
+        ) : (
+          <Text style={styles.errorText}>No se pudo generar el código QR</Text>
+        )}
 
         {/* Botón Regresar */}
         <TouchableOpacity
@@ -71,6 +134,45 @@ const styles = StyleSheet.create({
     height: 150,
     marginBottom: 30,
     resizeMode: "contain",
+  },
+  userInfo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 10,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#d32f2f",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  retryButton: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   backButton: {
     backgroundColor: "#a5d2cf",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,18 +10,61 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import apiClient from "../Api/apiClient";
+import AuthService from "../Services/AuthService";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [balance, setBalance] = useState("0");
+  const [loading, setLoading] = useState(true);
 
-  const onRefresh = () => {
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      console.log('Intentando obtener perfil del usuario...');
+      console.log('URL base del API:', apiClient.defaults.baseURL);
+      console.log('Token disponible:', await AuthService.getToken() ? 'Sí' : 'No');
+      
+      const response = await apiClient.get('/api/user/profile');
+      console.log('Respuesta del perfil:', response.data);
+      
+      // La respuesta tiene la estructura: { id, name, email, balance, payment_methods }
+      if (response.data && response.data.balance !== undefined) {
+        const userBalance = response.data.balance;
+        setBalance(userBalance.toString());
+        console.log('Balance cargado correctamente:', userBalance);
+      } else {
+        console.log('No se pudo obtener el balance del perfil');
+        setBalance('0');
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      // Mantener el balance anterior en caso de error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-      setLastUpdated(new Date().toLocaleTimeString());
-    }, 2000);
+    await fetchUserProfile();
+    setRefreshing(false);
+    setLastUpdated(new Date().toLocaleTimeString());
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AuthService.logout();
+      navigation.replace("Login");
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   return (
@@ -47,7 +90,7 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconTopRight}>
+        <TouchableOpacity style={styles.iconTopRight} onPress={handleLogout}>
           <Image
             source={require("../../assets/logout-icon.png")}
             style={styles.iconImage}
@@ -65,7 +108,9 @@ export default function HomeScreen() {
         {/* Monto */}
         <View style={styles.balanceContainer}>
           <Text style={styles.balanceLabel}>Monto</Text>
-          <Text style={styles.balanceAmount}>₡15.000</Text>
+          <Text style={styles.balanceAmount}>
+            {loading ? "Cargando..." : `₡${parseFloat(balance).toLocaleString('es-CR')}`}
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.button}

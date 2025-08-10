@@ -22,6 +22,8 @@ import {
   Poppins_400Regular,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import apiClient from "../Api/apiClient";
+import AuthService from "../Services/AuthService";
 
 const fondoImage = require("../../assets/fondo.png");
 const defaultAvatar = require("../../assets/profile-icon.png");
@@ -97,19 +99,42 @@ export default function UserScreen({ navigation }) {
     fetchUserData();
   }, []);
 
-  const fetchUserData = () => {
-    setLoading(true);
-    setTimeout(() => {
-      const mockUser = {
-        id: 12345,
-        name: "Juan Pérez",
-        email: "juan@example.com",
-        balance: 12000.5,
-      };
-      setUser(mockUser);
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      console.log('UserScreen - Obteniendo datos del usuario...');
+      
+      const response = await apiClient.get('/api/user/profile');
+      console.log('UserScreen - Respuesta del perfil:', response.data);
+      
+      // La respuesta tiene la estructura: { id, name, email, balance, payment_methods }
+      if (response.data) {
+        const userData = {
+          id: response.data.id,
+          name: response.data.name,
+          email: response.data.email,
+          balance: response.data.balance || 0,
+        };
+        setUser(userData);
+        console.log('UserScreen - Datos del usuario cargados:', userData);
+      } else {
+        console.log('UserScreen - No se pudieron obtener los datos del usuario');
+      }
+    } catch (error) {
+      console.error('UserScreen - Error obteniendo datos del usuario:', error);
+      // En caso de error, mantener los datos anteriores o mostrar valores por defecto
+      if (!user) {
+        setUser({
+          id: 'Error',
+          name: 'Error al cargar',
+          email: 'Error al cargar',
+          balance: 0,
+        });
+      }
+    } finally {
       setLoading(false);
       setRefreshing(false);
-    }, 1000);
+    }
   };
 
   const onRefresh = useCallback(() => {

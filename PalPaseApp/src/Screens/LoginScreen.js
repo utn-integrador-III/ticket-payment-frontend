@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from "react-native";
 import apiClient from "../Api/apiClient";
+import AuthService from "../Services/AuthService";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -20,21 +21,52 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await apiClient.post("/login", {
-        email: email.trim().toLowerCase(),
-        password: contrasena,
-      });
+      console.log('Intentando login con:', email);
+      
+      // Probemos diferentes endpoints
+      let response;
+      try {
+        response = await apiClient.post("/api/login", {
+          email: email.trim().toLowerCase(),
+          password: contrasena,
+        });
+        console.log('Login exitoso con /api/login');
+      } catch (firstError) {
+        console.log('Error con /api/login:', firstError.response?.status);
+        try {
+          response = await apiClient.post("/login", {
+            email: email.trim().toLowerCase(),
+            password: contrasena,
+          });
+          console.log('Login exitoso con /login');
+        } catch (secondError) {
+          console.log('Error con /login:', secondError.response?.status);
+          throw firstError; // Lanzar el primer error
+        }
+      }
 
       const data = response.data;
+      console.log('Datos recibidos:', data);
 
-      navigation.replace("Home", { userId: data.user_id, token: data.access_token });
+      // Almacenar token y userId usando AuthService
+      // La respuesta tiene la estructura: { access_token, token_type, user: { id, balance, email, name } }
+      if (data.access_token && data.user && data.user.id) {
+        await AuthService.setAuthData(data.access_token, data.user.id);
+        console.log('Login exitoso, navegando a Home');
+        navigation.replace("Home");
+      } else {
+        console.log('Estructura de respuesta inesperada:', data);
+        alert("Error: Respuesta del servidor no válida");
+      }
     } catch (error) {
+      console.error('Error completo:', error);
       if (error.response && error.response.data && error.response.data.detail) {
         alert(error.response.data.detail);
+      } else if (error.response) {
+        alert(`Error ${error.response.status}: ${error.response.statusText}`);
       } else {
         alert("Error de conexión con el servidor");
       }
-      console.error(error);
     }
   };
 
