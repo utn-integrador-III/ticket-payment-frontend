@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,114 @@ import {
   ImageBackground,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import apiClient from "../Api/apiClient";
+import AuthService from "../Services/AuthService";
 
 export default function ManageCardsScreen() {
   const navigation = useNavigation();
-  const [selectedCard, setSelectedCard] = useState("Tarjeta 1");
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, []);
+
+  const fetchPaymentMethods = async () => {
+    try {
+      setLoading(true);
+      console.log('ManageCardsScreen - Obteniendo métodos de pago...');
+      
+      const response = await apiClient.get('/api/payment/methods');
+      console.log('ManageCardsScreen - Respuesta:', response.data);
+      
+      if (response.data && response.data.payment_methods) {
+        setPaymentMethods(response.data.payment_methods);
+        // Seleccionar la primera tarjeta por defecto si existe
+        if (response.data.payment_methods.length > 0) {
+          setSelectedCard(response.data.payment_methods[0]);
+        }
+        console.log('ManageCardsScreen - Métodos de pago cargados:', response.data.count);
+      } else {
+        setPaymentMethods([]);
+      }
+    } catch (error) {
+      console.error('ManageCardsScreen - Error obteniendo métodos de pago:', error);
+      Alert.alert('Error', 'No se pudieron cargar los métodos de pago');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPaymentMethods();
+  };
 
   const handleSelectCard = () => {
+    if (paymentMethods.length === 0) {
+      Alert.alert('Sin tarjetas', 'No tienes métodos de pago registrados');
+      return;
+    }
+
+    const options = paymentMethods.map((method, index) => ({
+      text: `**** **** **** ${method.card_number.slice(-4)} (${method.card_holder})`,
+      onPress: () => setSelectedCard(method)
+    }));
+
+    options.push({ text: "Cancelar", style: "cancel" });
+
+    Alert.alert("Seleccionar Tarjeta", "Elige una tarjeta:", options);
+  };
+
+  const handleDeleteCard = () => {
+    if (!selectedCard) {
+      Alert.alert('Error', 'Por favor selecciona una tarjeta para eliminar');
+      return;
+    }
+
     Alert.alert(
-      "Seleccionar Tarjeta",
-      "Aquí podrías mostrar un selector real",
+      'Confirmar eliminación',
+      `¿Estás seguro de que deseas eliminar la tarjeta de ${selectedCard.card_holder}?`,
       [
-        { text: "Tarjeta 1", onPress: () => setSelectedCard("Tarjeta 1") },
-        { text: "Tarjeta 2", onPress: () => setSelectedCard("Tarjeta 2") },
-        { text: "Tarjeta 3", onPress: () => setSelectedCard("Tarjeta 3") },
-        { text: "Cancelar", style: "cancel" },
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Eliminar', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              console.log('ManageCardsScreen - Eliminando tarjeta:', selectedCard.card_holder);
+              
+              // Usar card_holder como identificador para la eliminación
+              const response = await apiClient.delete(`/api/payment/methods/${encodeURIComponent(selectedCard.card_holder)}`);
+              console.log('ManageCardsScreen - Tarjeta eliminada exitosamente');
+              
+              Alert.alert('Éxito', 'Tarjeta eliminada correctamente');
+              
+              // Recargar la lista de métodos de pago
+              await fetchPaymentMethods();
+              
+              // Limpiar la selección
+              setSelectedCard(null);
+              
+            } catch (error) {
+              console.error('ManageCardsScreen - Error eliminando tarjeta:', error);
+              
+              if (error.response && error.response.data && error.response.data.detail) {
+                Alert.alert('Error', error.response.data.detail);
+              } else {
+                Alert.alert('Error', 'No se pudo eliminar la tarjeta. Inténtalo de nuevo.');
+              }
+            }
+          }
+        }
       ]
     );
   };
@@ -33,58 +125,103 @@ export default function ManageCardsScreen() {
       style={styles.background}
       resizeMode="cover"
     >
-      {/* Iconos */}
-      <TouchableOpacity
-        style={styles.iconTopLeft}
-        onPress={() => navigation.navigate("User")}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
+        {/* Iconos */}
+        <TouchableOpacity
+          style={styles.iconTopLeft}
+          onPress={() => navigation.navigate("User")}
+        >
+          <Image
+            source={require("../../assets/profile-icon.png")}
+            style={styles.iconImage}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconTopRight}>
+          <Image
+            source={require("../../assets/logout-icon.png")}
+            style={styles.iconImage}
+          />
+        </TouchableOpacity>
+
+        {/* Logo */}
         <Image
-          source={require("../../assets/profile-icon.png")}
-          style={styles.iconImage}
+          source={require("../../assets/logo-palpase.png")}
+          style={styles.logo}
+          resizeMode="contain"
         />
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.iconTopRight}>
-        <Image
-          source={require("../../assets/logout-icon.png")}
-          style={styles.iconImage}
-        />
-      </TouchableOpacity>
+        {/* Estado de carga */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#007BFF" />
+            <Text style={styles.loadingText}>Cargando métodos de pago...</Text>
+          </View>
+        ) : (
+          <>
+            {/* Selector de tarjeta */}
+            <Text style={styles.label}>
+              Métodos de Pago ({paymentMethods.length})
+            </Text>
 
-      {/* Logo */}
-      <Image
-        source={require("../../assets/logo-palpase.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+            {paymentMethods.length > 0 ? (
+              <>
+                <TouchableOpacity style={styles.comboButton} onPress={handleSelectCard}>
+                  <Text style={styles.comboText}>
+                    {selectedCard 
+                      ? `${selectedCard.card_holder}`
+                      : 'Seleccionar tarjeta'
+                    } ▼
+                  </Text>
+                </TouchableOpacity>
 
-      {/* Simulación de combo box */}
-      <Text style={styles.label}>Seleccionar Tarjeta</Text>
+                {/* Información de la tarjeta seleccionada */}
+                {selectedCard && (
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.cardInfoTitle}>Tarjeta Seleccionada:</Text>
+                    <Text style={styles.cardInfoText}>Titular: {selectedCard.card_holder}</Text>
+                    <Text style={styles.cardInfoText}>Número: **** **** **** {selectedCard.card_number.slice(-4)}</Text>
+                    <Text style={styles.cardInfoText}>Vencimiento: {selectedCard.expiry}</Text>
+                  </View>
+                )}
+              </>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No tienes métodos de pago registrados</Text>
+                <Text style={styles.emptySubtext}>Agrega una tarjeta para comenzar</Text>
+              </View>
+            )}
+          </>
+        )}
 
-      <TouchableOpacity style={styles.comboButton} onPress={handleSelectCard}>
-        <Text style={styles.comboText}>
-          {selectedCard} ▼
-        </Text>
-      </TouchableOpacity>
+        {/* Botones */}
+        <TouchableOpacity 
+          style={[styles.buttonRed, (!selectedCard || loading) && styles.buttonDisabled]} 
+          onPress={handleDeleteCard}
+          disabled={!selectedCard || loading}
+        >
+          <Text style={styles.buttonText}>Eliminar</Text>
+        </TouchableOpacity>
 
-      {/* Botones */}
-      <TouchableOpacity style={styles.buttonRed}>
-        <Text style={styles.buttonText}>Eliminar</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonPink}
+          onPress={() => navigation.navigate("RegisterCard")}
+        >
+          <Text style={styles.buttonText}>Agregar Tarjeta</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.buttonPink}
-        onPress={() => navigation.navigate("RegisterCard")}
-      >
-        <Text style={styles.buttonText}>Agregar Tarjeta</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.buttonGreen}
-        onPress={() => navigation.navigate("Home")}
-      >
-        <Text style={styles.buttonText}>Regresar</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonGreen}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Text style={styles.buttonText}>Regresar</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -94,8 +231,11 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  scrollContainer: {
     alignItems: "center",
     paddingTop: 40,
+    paddingBottom: 20,
   },
   iconTopLeft: {
     position: "absolute",
@@ -159,6 +299,55 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     color: "#000",
+    textAlign: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: "#ccc",
+    opacity: 0.6,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    marginTop: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 10,
+  },
+  cardInfo: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    width: "90%",
+  },
+  cardInfoTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  cardInfoText: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 4,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    padding: 20,
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 5,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#999",
     textAlign: "center",
   },
 });

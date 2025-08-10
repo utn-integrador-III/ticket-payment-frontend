@@ -9,17 +9,95 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  ImageBackground
+  ImageBackground,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
+import apiClient from '../Api/apiClient';
+import AuthService from '../Services/AuthService';
 
 export default function RegisterCardScreen({ navigation }) {
   const [cardHolder, setCardHolder] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleAddCard = () => {
-    alert("Tarjeta agregada exitosamente");
+  const validateCardData = () => {
+    if (!cardHolder.trim()) {
+      Alert.alert('Error', 'Por favor ingresa el titular de la tarjeta');
+      return false;
+    }
+    if (!cardNumber.trim() || cardNumber.length < 13) {
+      Alert.alert('Error', 'Por favor ingresa un número de tarjeta válido');
+      return false;
+    }
+    if (!expiryDate.trim() || !expiryDate.includes('/')) {
+      Alert.alert('Error', 'Por favor ingresa una fecha de expiración válida (MM/YY)');
+      return false;
+    }
+    if (!cvv.trim() || cvv.length < 3) {
+      Alert.alert('Error', 'Por favor ingresa un CVV válido');
+      return false;
+    }
+    return true;
+  };
+
+  const handleAddCard = async () => {
+    if (!validateCardData()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log('RegisterCardScreen - Agregando método de pago...');
+      
+      const paymentMethodData = {
+        card_holder: cardHolder.trim(),
+        card_number: cardNumber.trim(),
+        expiry: expiryDate.trim(),
+        cvv: cvv.trim()
+      };
+
+      const response = await apiClient.post('/api/payment/methods', paymentMethodData);
+      console.log('RegisterCardScreen - Respuesta:', response.data);
+
+      if (response.data && response.data.message) {
+        Alert.alert(
+          'Éxito', 
+          response.data.message,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                // Limpiar formulario
+                setCardHolder('');
+                setCardNumber('');
+                setExpiryDate('');
+                setCvv('');
+                // Regresar a la pantalla anterior
+                navigation.goBack();
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error', 'Respuesta inesperada del servidor');
+      }
+    } catch (error) {
+      console.error('RegisterCardScreen - Error agregando tarjeta:', error);
+      let errorMessage = 'Error al agregar la tarjeta';
+      
+      if (error.response && error.response.data && error.response.data.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,8 +146,16 @@ export default function RegisterCardScreen({ navigation }) {
           onChangeText={setCvv}
         />
 
-        <TouchableOpacity style={styles.addButton} onPress={handleAddCard}>
-          <Text style={styles.addButtonText}>Agregar Tarjeta</Text>
+        <TouchableOpacity 
+          style={[styles.addButton, loading && styles.addButtonDisabled]} 
+          onPress={handleAddCard}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.addButtonText}>Agregar Tarjeta</Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -110,6 +196,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 20,
     marginTop: 10,
+  },
+  addButtonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.7,
   },
   addButtonText: {
     color: '#fff',
