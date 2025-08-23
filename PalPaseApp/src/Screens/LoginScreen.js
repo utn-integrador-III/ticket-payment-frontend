@@ -23,45 +23,72 @@ export default function LoginScreen({ navigation }) {
     try {
       console.log('Intentando login con:', email);
       
-      // Probemos diferentes endpoints
       let response;
+      let userType = null;
+      
+      // Primero intentar login como usuario (pasajero)
       try {
         response = await apiClient.post("/api/login", {
           email: email.trim().toLowerCase(),
           password: contrasena,
         });
-        console.log('Login exitoso con /api/login');
-      } catch (firstError) {
-        console.log('Error con /api/login:', firstError.response?.status);
+        userType = "user";
+        console.log('Login exitoso como usuario');
+      } catch (userError) {
+        console.log('Error con login de usuario:', userError.response?.status);
+        
+        // Si falla como usuario, intentar como chofer
         try {
-          response = await apiClient.post("/login", {
+          response = await apiClient.post("/api/driver/login", {
             email: email.trim().toLowerCase(),
             password: contrasena,
           });
-          console.log('Login exitoso con /login');
-        } catch (secondError) {
-          console.log('Error con /login:', secondError.response?.status);
-          throw firstError; // Lanzar el primer error
+          userType = "driver";
+          console.log('Login exitoso como chofer');
+        } catch (driverError) {
+          console.log('Error con login de chofer:', driverError.response?.status);
+          // Si ambos fallan, mostrar error del usuario
+          throw userError;
         }
       }
 
-      const data = response.data;
-      console.log('Datos recibidos:', data);
+      const responseData = response.data;
+      console.log('Datos recibidos:', responseData);
 
-      // Almacenar token y userId usando AuthService
-      // La respuesta tiene la estructura: { access_token, token_type, user: { id, balance, email, name } }
-      if (data.access_token && data.user && data.user.id) {
-        await AuthService.setAuthData(data.access_token, data.user.id);
-        console.log('Login exitoso, navegando a Home');
-        navigation.replace("Home");
-      } else {
-        console.log('Estructura de respuesta inesperada:', data);
-        alert("Error: Respuesta del servidor no válida");
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const data = responseData.data || responseData;
+      console.log('Datos procesados:', data);
+
+      // Manejar respuesta según el tipo de usuario
+      if (userType === "user") {
+        // Usuario normal - estructura: { access_token, token_type, user: { id, balance, email, name } }
+        if (data.access_token && data.user && data.user.id) {
+          await AuthService.setAuthData(data.access_token, data.user.id, "user");
+          console.log('Login exitoso como usuario, navegando a Home');
+          navigation.replace("Home");
+        } else {
+          console.log('Estructura de respuesta de usuario inesperada:', data);
+          console.log('Campos disponibles:', Object.keys(data));
+          alert("Error: Respuesta del servidor no válida para usuario");
+        }
+      } else if (userType === "driver") {
+        // Chofer - estructura: { access_token, token_type, driver: { id, name, email, license_number } }
+        if (data.access_token && data.driver && data.driver.id) {
+          await AuthService.setAuthData(data.access_token, data.driver.id, "driver");
+          console.log('Login exitoso como chofer, navegando a QRCodeScreen');
+          navigation.replace("QRCodeScreen");
+        } else {
+          console.log('Estructura de respuesta de chofer inesperada:', data);
+          console.log('Campos disponibles:', Object.keys(data));
+          alert("Error: Respuesta del servidor no válida para chofer");
+        }
       }
     } catch (error) {
       console.error('Error completo:', error);
       if (error.response && error.response.data && error.response.data.detail) {
         alert(error.response.data.detail);
+      } else if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
       } else if (error.response) {
         alert(`Error ${error.response.status}: ${error.response.statusText}`);
       } else {

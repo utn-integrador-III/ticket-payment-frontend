@@ -31,18 +31,24 @@ export default function QRCodeScreen() {
       console.log('QRCodeScreen - Obteniendo código QR del usuario...');
       
       const response = await apiClient.get('/api/user/qr');
-      console.log('QRCodeScreen - Respuesta del QR:', response.data);
+      console.log('QRCodeScreen - Respuesta completa:', response.data);
       
-      if (response.data) {
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('QRCodeScreen - Datos procesados:', responseData);
+      
+      if (responseData) {
         // La respuesta tiene: { qr_code, qr_data, user_id, user_name }
-        setQrData(response.data.qr_data); // ID del usuario para el QR
+        setQrData(responseData.qr_data); // ID del usuario para el QR
         setUserInfo({
-          id: response.data.user_id,
-          name: response.data.user_name,
-          qr_code: response.data.qr_code // Base64 image si quieres usarla
+          id: responseData.user_id,
+          name: responseData.user_name,
+          qr_code: responseData.qr_code // Base64 image si quieres usarla
         });
-        console.log('QRCodeScreen - QR cargado para usuario:', response.data.user_name);
+        console.log('QRCodeScreen - QR cargado para usuario:', responseData.user_name);
       } else {
+        console.log('QRCodeScreen - No se encontraron datos en la respuesta');
+        console.log('QRCodeScreen - Campos disponibles:', Object.keys(responseData || {}));
         setError('No se pudo obtener el código QR');
       }
     } catch (error) {

@@ -2,7 +2,7 @@ import axios from "axios";
 import AuthService from "../Services/AuthService";
 
 const apiClient = axios.create({
-  baseURL: "http://192.168.100.8:8000", // Cambiar por ip del backend
+  baseURL: "http://10.187.236.157:8000", // Cambiar por ip del backend
   timeout: 10000, // Tiempo máximo de espera en milisegundos
   headers: {
     "Content-Type": "application/json",
