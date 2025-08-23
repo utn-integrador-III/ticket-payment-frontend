@@ -340,7 +340,11 @@ export default function UserScreen({ navigation }) {
               <Text style={styles.buttonText}>{t.editProfile}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={showInDevelopment}>
+            {/* BOTON CAMBIAR CONTRASEÑA */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate("ChangePassword")}
+            >
               <Text style={styles.buttonText}>{t.changePassword}</Text>
             </TouchableOpacity>
 
