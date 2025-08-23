@@ -28,15 +28,20 @@ export default function HomeScreen() {
       console.log('Token disponible:', await AuthService.getToken() ? 'Sí' : 'No');
       
       const response = await apiClient.get('/api/user/profile');
-      console.log('Respuesta del perfil:', response.data);
+      console.log('HomeScreen - Respuesta completa:', response.data);
+      
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('HomeScreen - Datos procesados:', responseData);
       
       // La respuesta tiene la estructura: { id, name, email, balance, payment_methods }
-      if (response.data && response.data.balance !== undefined) {
-        const userBalance = response.data.balance;
+      if (responseData && responseData.balance !== undefined) {
+        const userBalance = responseData.balance;
         setBalance(userBalance.toString());
-        console.log('Balance cargado correctamente:', userBalance);
+        console.log('HomeScreen - Balance cargado correctamente:', userBalance);
       } else {
-        console.log('No se pudo obtener el balance del perfil');
+        console.log('HomeScreen - No se pudo obtener el balance del perfil');
+        console.log('HomeScreen - Campos disponibles:', Object.keys(responseData || {}));
         setBalance('0');
       }
     } catch (error) {

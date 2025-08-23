@@ -107,13 +107,17 @@ export default function UserScreen({ navigation }) {
       const response = await apiClient.get('/api/user/profile');
       console.log('UserScreen - Respuesta del perfil:', response.data);
       
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('UserScreen - Datos procesados:', responseData);
+      
       // La respuesta tiene la estructura: { id, name, email, balance, payment_methods }
-      if (response.data) {
+      if (responseData) {
         const userData = {
-          id: response.data.id,
-          name: response.data.name,
-          email: response.data.email,
-          balance: response.data.balance || 0,
+          id: responseData.id,
+          name: responseData.name,
+          email: responseData.email,
+          balance: responseData.balance || 0,
         };
         setUser(userData);
         console.log('UserScreen - Datos del usuario cargados:', userData);
@@ -245,7 +249,7 @@ export default function UserScreen({ navigation }) {
               { color: theme.title, fontFamily: "Poppins_700Bold" },
             ]}
           >
-            {t.welcome}, {user.name.split(" ")[0]}!
+            {t.welcome}, {user?.name ? user.name.split(" ")[0] : 'Usuario'}!
           </Animatable.Text>
 
           <TouchableOpacity
@@ -272,13 +276,13 @@ export default function UserScreen({ navigation }) {
             </Text>
 
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.id}: {user.id}
+              {t.id}: {user?.id || 'N/A'}
             </Text>
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.email}: {user.email}
+              {t.email}: {user?.email || 'N/A'}
             </Text>
             <Text style={[styles.label, { color: theme.title }]}>
-              {t.balance}: ₡{user.balance.toFixed(2)}
+              {t.balance}: ₡{user?.balance ? user.balance.toFixed(2) : '0.00'}
             </Text>
 
             <View style={styles.section}>

@@ -35,16 +35,23 @@ export default function RecargaTarjeta({ navigation }) {
       console.log('RechargeCard - Obteniendo métodos de pago...');
       
       const response = await apiClient.get('/api/payment/methods');
-      console.log('RechargeCard - Respuesta:', response.data);
+      console.log('RechargeCard - Respuesta completa:', response.data);
       
-      if (response.data && response.data.payment_methods) {
-        setPaymentMethods(response.data.payment_methods);
-        console.log('RechargeCard - Métodos de pago cargados:', response.data.count);
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('RechargeCard - Datos procesados:', responseData);
+      
+      if (responseData && responseData.payment_methods) {
+        setPaymentMethods(responseData.payment_methods);
+        console.log('RechargeCard - Métodos de pago cargados:', responseData.count || responseData.payment_methods.length);
       } else {
+        console.log('RechargeCard - No se encontraron payment_methods en la respuesta');
+        console.log('RechargeCard - Campos disponibles:', Object.keys(responseData || {}));
         setPaymentMethods([]);
       }
     } catch (error) {
       console.error('RechargeCard - Error obteniendo métodos de pago:', error);
+      console.error('RechargeCard - Error response:', error.response?.data);
       Alert.alert('Error', 'No se pudieron cargar los métodos de pago');
     } finally {
       setLoadingMethods(false);
@@ -79,12 +86,16 @@ export default function RecargaTarjeta({ navigation }) {
         payment_method_id: paymentMethodId
       });
       
-      console.log('RechargeCard - Respuesta de recarga:', response.data);
+      console.log('RechargeCard - Respuesta completa:', response.data);
       
-      if (response.data && response.data.message) {
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('RechargeCard - Datos procesados:', responseData);
+      
+      if (responseData && responseData.message) {
         Alert.alert(
           'Recarga Exitosa', 
-          `${response.data.message}\nNuevo saldo: ₡${response.data.balance}`,
+          `${responseData.message}\nNuevo saldo: ₡${responseData.balance}`,
           [
             {
               text: 'OK',

@@ -32,20 +32,27 @@ export default function ManageCardsScreen() {
       console.log('ManageCardsScreen - Obteniendo métodos de pago...');
       
       const response = await apiClient.get('/api/payment/methods');
-      console.log('ManageCardsScreen - Respuesta:', response.data);
+      console.log('ManageCardsScreen - Respuesta completa:', response.data);
       
-      if (response.data && response.data.payment_methods) {
-        setPaymentMethods(response.data.payment_methods);
+      // Extraer datos del objeto data si existe (estructura del backend)
+      const responseData = response.data.data || response.data;
+      console.log('ManageCardsScreen - Datos procesados:', responseData);
+      
+      if (responseData && responseData.payment_methods) {
+        setPaymentMethods(responseData.payment_methods);
         // Seleccionar la primera tarjeta por defecto si existe
-        if (response.data.payment_methods.length > 0) {
-          setSelectedCard(response.data.payment_methods[0]);
+        if (responseData.payment_methods.length > 0) {
+          setSelectedCard(responseData.payment_methods[0]);
         }
-        console.log('ManageCardsScreen - Métodos de pago cargados:', response.data.count);
+        console.log('ManageCardsScreen - Métodos de pago cargados:', responseData.count || responseData.payment_methods.length);
       } else {
+        console.log('ManageCardsScreen - No se encontraron payment_methods en la respuesta');
+        console.log('ManageCardsScreen - Campos disponibles:', Object.keys(responseData || {}));
         setPaymentMethods([]);
       }
     } catch (error) {
       console.error('ManageCardsScreen - Error obteniendo métodos de pago:', error);
+      console.error('ManageCardsScreen - Error response:', error.response?.data);
       Alert.alert('Error', 'No se pudieron cargar los métodos de pago');
     } finally {
       setLoading(false);
