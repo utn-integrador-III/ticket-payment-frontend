@@ -1,0 +1,13 @@
+{
+  "java.compile.nullAnalysis.mode": "automatic",
+  "files.exclude": {
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/node_modules": true
+  },
+  "java.configuration.exclude": ["**/node_modules"],
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "java.configuration.updateBuildConfiguration": "interactive"
+}
