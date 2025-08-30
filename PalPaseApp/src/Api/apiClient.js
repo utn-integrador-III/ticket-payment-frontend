@@ -1,8 +1,11 @@
 import axios from "axios";
 import AuthService from "../Services/AuthService";
 
+// Configuración de la URL base de la API (usando IP directa de la red Docker)
+const API_BASE_URL = "http://192.168.100.13:5000";
+
 const apiClient = axios.create({
-  baseURL: "http://10.187.236.157:8000", // Cambiar por ip del backend
+  baseURL: API_BASE_URL,
   timeout: 10000, // Tiempo máximo de espera en milisegundos
   headers: {
     "Content-Type": "application/json",
